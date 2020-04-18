@@ -1,12 +1,12 @@
-// reference: https://github.com/neverendingqs/serverless-websocket-example/blob/master/src/websocket.js
+const { get } = require('deep-object-js');
 const ConnectionHandler = require('../../lib/ConnectionHandler');
 
 const lambda = async event => {
   try {
     console.log('event', event);
-    const { requestContext: { connectionId, routeKey } } = event;
+    const { queryStringParameters, requestContext: { connectionId, routeKey } } = event;
 
-    await new ConnectionHandler({ connectionId, action: routeKey }).run();
+    await new ConnectionHandler({ connectionId, type: get(queryStringParameters, 'type'), action: routeKey }).run();
 
     return { statusCode: 200 };
   } catch (err) {

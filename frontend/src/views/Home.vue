@@ -8,18 +8,13 @@
 </template>
 
 <script>
-import HelloWorld from '@/components/HelloWorld.vue';
-
 export default {
   name: 'Home',
-  components: {
-    HelloWorld,
-  },
   data() {
     return {
-      endpoint: 'ws://localhost:3001',
       messages: [],
-      websocket: undefined
+      websocket: undefined,
+      eventType: 'test',
     };
   },
   methods: {
@@ -31,20 +26,21 @@ export default {
 
       // WebSocket sends a message to API Gateway on creation that gets
       // routed to the '$connect' route
-      this.websocket = new WebSocket(this.endpoint);
+      this.websocket = new WebSocket(`${this.$WS_HOST}/?type=${this.eventType}`);
 
       console.log('this.websocket', this.websocket);
 
       // util para reabrir a connection caso tenha sido fechada por inatividade
       this.websocket.onclose = ({ wasClean, code, reason }) => {
         this.messages.push(
-          `onclose: ${JSON.stringify({ wasClean, code, reason })}`);
+          `onclose: ${JSON.stringify({ wasClean, code, reason })}`,
+        );
       };
 
-      this.websocket.onerror = error => {
+      this.websocket.onerror = (error) => {
         console.log(error);
         this.messages.push(
-          'onerror: An error has occurred. See console for details.'
+          'onerror: An error has occurred. See console for details.',
         );
       };
 
@@ -60,32 +56,16 @@ export default {
       this.messages.push('client: Sending a message.');
 
       this.websocket.send(
-        // This message will be routed to 'routeA' based on the 'action'
-        // property
-        JSON.stringify({ action: 'routeA', data: 'Hello from client.' })
-      );
-      this.websocket.send(
-        // This message will be routed to the '$default' route as 'routeB'
-        // has not been defined
-        JSON.stringify({ action: 'routeB', data: 'Hello from client.' })
+        // This message will be routed to 'routeA' based on the 'action' property
+        JSON.stringify({ action: 'routeA', data: 'Hello from client.' }),
       );
     },
     disconnect() {
       // WebSocket sends a $disconnect message to the server on page reload or close, so you do not have to close the connection yourself in those scenarios
-      // WebSocket sends a message to API Gateway that gets routed to the
-      // '$disconnect' route.
+      // WebSocket sends a message to API Gateway that gets routed to the '$disconnect' route.
       this.messages.push('client: Closing the connection.');
       this.websocket.close();
-    }
+    },
   },
-
-  // Discover what the WebSocket endpoint is. This implementation is for
-  // demo purposes only and should be done differently in production.
-  // async beforeCreate() {
-  //   // const response = await fetch('./data.json');
-  //   // const { ServiceEndpointWebsocket } = await response.json();
-  //   // this.endpoint = ServiceEndpointWebsocket;
-  //   // this.endpoint = 'localhost:3001';
-  // }
 };
 </script>
