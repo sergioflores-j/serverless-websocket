@@ -1,0 +1,120 @@
+service: serverless-websocket-test
+
+# you can add packaging information here
+package:
+ exclude:
+   - node_modules/aws-sdk/**
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  memorySize: 256
+  stage: api
+  region: sa-east-1
+  # API GW Websocket specific configuration
+  websocketsApiName: ${self:service}-apigw-websocket-${opt:stage, self:provider.stage}
+  # Custom routes are selected by the value of the action property in the body
+  websocketsApiRouteSelectionExpression: $request.body.action
+  environment:
+    DYNAMODB_CONNECTIONS_TABLE: Websocket.Connections
+    DYNAMODB_CONNECTIONS_TABLE_TYPE_GSI: Websocket.Connections.Type
+    LOCAL_WEBSOCKET_API_ENDPOINT: 'localhost:3001'
+    WEBSOCKET_API_ENDPOINT: !Join ['', ['https://', !Ref WebsocketsApi, '.execute-api.', '${opt:region, self:provider.region}', '.amazonaws.com/', '${opt:stage, self:provider.stage}/']]
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - 'execute-api:ManageConnections'
+      Resource:
+        - 'arn:aws:execute-api:${opt:region, self:provider.region}:*:**/@connections/*'
+    - Effect: Allow
+      Action:
+        - dynamodb:PutItem
+        - dynamodb:GetItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+        - dynamodb:BatchGetItem
+        - dynamodb:BatchWriteItem
+        - dynamodb:Scan
+        - dynamodb:Query
+      Resource:
+        Resource:
+          - 'arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_CONNECTIONS_TABLE}'
+          - 'arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_CONNECTIONS_TABLE}/index/${self:provider.environment.DYNAMODB_CONNECTIONS_TABLE_TYPE_GSI}'
+
+functions:
+  authUser:
+    handler: src/v1/http/authUser.lambda
+    events:
+      - http:
+          path: v1/auth
+          method: POST
+  # authWebsocket:
+  #   handler: src/v1/authWebsocket.lambda
+  #   cors:
+  #     origin: ${self:custom.corsOrigin}
+  connectionHandler:
+    handler: src/v1/ws/connection.lambda
+    events:
+      - websocket:
+          # Handles new connection requests
+          route: $connect
+          # authorizer:
+          #   name: authWebsocket
+      - websocket:
+          # Handles disconnect messages
+          route: $disconnect
+  healthCheck:
+    handler: src/v1/ws/health.lambda
+    events:
+      - websocket:
+          # Handles all unrouted messages
+          route: $default
+  websocket:
+    handler: src/websocket.handler
+    events:
+      - websocket:
+          # Route messages here if '$request.body.action' is 'routeA'.
+          # You can adjust which property to use for routing by adjusting
+          # 'websocketsApiRouteSelectionExpression'.
+          route: routeA
+
+plugins:
+  - serverless-offline
+  - serverless-dynamodb-local
+
+custom:
+  serverless-offline:
+    useChildProcesses: true
+  dynamodb:
+    stages:
+      - api
+      - stage
+      - stage
+    start:
+      port: 8000
+      migrate: true
+      seed: true
+      convertEmptyValues: true
+
+resources:
+  Resources:
+    WebsocketConnectionsTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        TableName: ${self:provider.environment.DYNAMODB_CONNECTIONS_TABLE}
+        AttributeDefinitions:
+          - AttributeName: connectionId
+            AttributeType: S
+          - AttributeName: type
+            AttributeType: S
+        KeySchema:
+          - AttributeName: connectionId
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        GlobalSecondaryIndexes:
+          - IndexName: ${self:provider.environment.DYNAMODB_CONNECTIONS_TABLE_TYPE_GSI}
+            KeySchema:
+              - AttributeName: type
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL

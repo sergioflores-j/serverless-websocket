@@ -1,0 +1,36 @@
+{
+  "name": "serverless-websocket",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://sergioflores-j@github.com/sergioflores-j/serverless-websocket.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sergioflores-j/serverless-websocket/issues"
+  },
+  "homepage": "https://github.com/sergioflores-j/serverless-websocket#readme",
+  "devDependencies": {
+    "eslint": "^5.16.0",
+    "eslint-config-airbnb-base": "^14.1.0",
+    "eslint-import-resolver-node": "^0.3.2",
+    "eslint-plugin-import": "^2.20.1",
+    "nodemon": "^2.0.3",
+    "serverless": "^1.67.3",
+    "serverless-dynamodb-local": "^0.2.39",
+    "serverless-offline": "^5.12.1"
+  },
+  "dependencies": {
+    "aws-dynamodb-factory-js": "^2.0.2",
+    "aws-sdk": "^2.658.0",
+    "deep-object-js": "^1.1.1",
+    "moment-timezone": "^0.5.28",
+    "uuid": "^7.0.3"
+  }
+}

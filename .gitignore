@@ -1,0 +1,10 @@
+# node
+node_modules
+
+# Back
+.serverless
+.dynamodb
+
+# Tests
+.coverage
+.nyc_output
