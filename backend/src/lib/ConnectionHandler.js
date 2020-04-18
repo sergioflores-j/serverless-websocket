@@ -1,4 +1,3 @@
-// !Obs: o código não é alterado em tempo real quando utilizado ws = https://github.com/dherault/serverless-offline/issues/864
 const dynamodb = require('./connectors/DynamoDB');
 
 module.exports = class ConnectionHandler {

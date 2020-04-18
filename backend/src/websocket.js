@@ -1,13 +1,10 @@
-// reference: https://github.com/neverendingqs/serverless-websocket-example/blob/master/src/websocket.js
-// !Obs: o código não é alterado em tempo real quando utilizado ws = https://github.com/dherault/serverless-offline/issues/864
-
 const AWS = require('aws-sdk');
 
 const dynamodb = new AWS.DynamoDB.DocumentClient();
-// const ApiGateway = require('./lib/ApiGateway');
+
 // you need to provide the URL to your WebSocket API on class creation
 const apiGateway = new AWS.ApiGatewayManagementApi({
-  endpoint: process.env.APIG_ENDPOINT,
+  endpoint: process.env.LOCAL_WEBSOCKET_API_ENDPOINT,
 });
 
 const { DYNAMODB_CONNECTIONS_TABLE } = process.env;

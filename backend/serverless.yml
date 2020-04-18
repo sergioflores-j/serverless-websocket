@@ -12,13 +12,13 @@ provider:
   stage: api
   region: sa-east-1
   # API GW Websocket specific configuration
-  websocketsApiName: ${self:service}-apigw-websocket-${opt:stage, self:provider.stage}
+  # websocketsApiName: ${self:service}-apigw-websocket-${opt:stage, self:provider.stage}
   # Custom routes are selected by the value of the action property in the body
   websocketsApiRouteSelectionExpression: $request.body.action
   environment:
     DYNAMODB_CONNECTIONS_TABLE: Websocket.Connections
     DYNAMODB_CONNECTIONS_TABLE_TYPE_GSI: Websocket.Connections.Type
-    LOCAL_WEBSOCKET_API_ENDPOINT: 'localhost:3001'
+    LOCAL_WEBSOCKET_API_ENDPOINT: 'http://localhost:3001'
     WEBSOCKET_API_ENDPOINT: !Join ['', ['https://', !Ref WebsocketsApi, '.execute-api.', '${opt:region, self:provider.region}', '.amazonaws.com/', '${opt:stage, self:provider.stage}/']]
   iamRoleStatements:
     - Effect: Allow

@@ -15,7 +15,7 @@ class ApiGateway {
     return this._connector;
   }
 
-  async generateSocketMessage(connectionId, data) {
+  async generateSocketMessage({ connectionId, data } = {}) {
     try {
       return await this._connector.postToConnection({
         ConnectionId: connectionId,

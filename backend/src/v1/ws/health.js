@@ -1,10 +1,14 @@
-const lambda = async event => {
-  console.log(event);
+const apiGateway = require('../../lib/connectors/ApiGateway');
 
-  return {
-    statusCode: 200,
-    body: 'Ok',
-  };
+const lambda = async event => {
+  const { requestContext: { connectionId } } = event;
+
+  await apiGateway.generateSocketMessage({
+    connectionId,
+    data: 'PONG',
+  });
+
+  return { statusCode: 200 };
 };
 
 module.exports = {
